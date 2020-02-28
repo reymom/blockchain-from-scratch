@@ -9,7 +9,7 @@ verify_ssl = true
 flask = "*"
 requests = "*"
 python-dotenv = "*"
-pycryptodome = "==3.4.3"
+pycryptodome = "==3.6.6"
 flask-cors = "*"
 
 [requires]
