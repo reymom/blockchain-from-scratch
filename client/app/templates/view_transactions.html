@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card-body">
+                <h4 class="card-title">View Transactions</h4>
+                <p class="card-text">Enter a blockchain node URL to View Transactions</p>
+            </div>
+        </div>
+    </div>
+    <div class="container alert alert-secondary">
+        <div class="row">
+            <label class="col-sm-2">Node URL:</label>
+            <div class="col-sm-10">
+                <textarea id="node_url" class="form-control">http://127.0.0.1:5000</textarea>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <input type="button" id="view_transactions" class="btn btn-primary btn-lg" value="View Transactions">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <table id="transactions_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script src="/static/jquery/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/DataTables/js/datatables.min.js"></script>
+    <script src="/static/DataTables/js/ellipsis.js"></script>
+    <script>
+    $(function(){
+        $('#view_transactions').click(function(){
+            $.ajax({
+                url: document.getElementById("node_url").value + "/chain",
+                type: 'GET',
+                success: function(response){
+                    console.log(response);
+                    var transactions = [];
+                    count = 1;
+                    for (i = 1; i < response.length; i++) {
+                        for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
+                            var options = {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit"
+                            };
+                            var date = new Date(response["chain"][i]["timestamp"] * 1000);
+                            var formattedDateTime = date.toLocaleTimeString("en-us", options);
+                            transaction = [
+                                count,
+                                response["chain"][i]["transactions"][j]["recipient_address"],
+                                response["chain"][i]["transactions"][j]["sender_address"],
+                                response["chain"][i]["transactions"][j]["value"],
+                                formattedDateTime,
+                                response["chain"][i]["block_number"]
+                            ];
+                            transactions.push(transaction);
+                            count += 1;
+                        };
+                    };
+                    $('#transactions_table').dataTable({
+                        data: transactions,
+                        columns: [
+                            {title: "#"},
+                            {title: "Recipient Address"},
+                            {title: "Sender Address"},
+                            {title: "Value"},
+                            {title: "Timestamp"},
+                            {title: "Block"}
+                        ],
+                        columnDefs: [{
+                            targets: [1,2,3,4,5],
+                            render: $.fn.dataTable.render.ellipsis(25)
+                        }]
+                    });
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        });
+    })
+</script>
+{% endblock %}

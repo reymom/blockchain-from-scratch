@@ -1,0 +1,3 @@
+FLASK_APP=reymonchain.py
+FLASK_RUN_HOST=localhost
+FLASK_RUN_PORT=8000
